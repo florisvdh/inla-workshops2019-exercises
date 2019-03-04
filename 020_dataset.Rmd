@@ -1,0 +1,108 @@
+# Opbouw van de dataset {#dataset}
+
+We vertrekken van de data-objecten die eerder door Ivy werden samengesteld op 15 februari 2018 (LG3- en HG3-waarnemingen vanaf 1989), op basis van de Watina-databank van  INBO. Alleen piëzometers met een filter met onderkant minder dan 3 meter onder maaiveld werden in rekening gebracht. Van piëzometerkoppels werd alleen de meest ondiepe piëzometer meegenomen. Voor een meer uitgebreide toelichting bij de dataselectie en een meer uitgebreide dataverkenning, zie Ivy's interne rapporten.
+
+De dataset werd voor deze oefening verder beperkt tot de types met méér data (de grens kan nog worden opgedreven), en aquatische types zijn geweerd (zie paragraaf \@ref(evolutie)).
+
+```{r message=FALSE, eval=FALSE}
+XG3s <- git2rdata::read_vc("GXGs")
+XG3s_long <-
+    XG3s %>% 
+    filter(HydroJaar >= 1989,
+             !str_detect(Habitat, "31|rbbah")) %>% 
+    mutate(
+        HYear = HydroJaar - min(HydroJaar),
+        SixYearPeriod = factor(floor((HydroJaar - 1989) / 6)),
+        Type = factor(Habitat),
+        Fysicalregion = interaction(FysRegio, ligging2, drop = TRUE),
+        Soiltexture = Bodem %>% 
+                           plyr::mapvalues(c("Zwaar", "Licht", "Veen"),
+                                           c("Fine", "Coarse", "Peat")
+                                           )
+        ) %>% 
+    select(Location = MeetpuntWID,
+           Xcoord = MeetpuntXCoordinaat,
+           Ycoord = MeetpuntYCoordinaat,
+           Type,
+           HYear, 
+           SixYearPeriod,
+           HG3 = GHG_2,
+           LG3 = GLG_2,
+           # Typegroup = HabitatGroep,
+           Soiltexture,
+           Fysicalregion,
+           Ecoregion = EcoRegio) %>% 
+    filter(!is.na(HG3) | !is.na(LG3)) %>%
+    gather(key = "Variable", value = "Value", HG3, LG3) %>% 
+    filter(!is.na(Value)) %>% 
+    mutate(Variable = factor(Variable),
+           Value = ifelse(Value > 0, 0, -Value * 100) # van meter naar cm; positief wordt onder maaiveld
+           # posValue = Value + 1, # strikt positieve waarde
+           # logValue = log10(posValue)
+           )
+XG3s_long %>% 
+    semi_join(XG3s_long %>%
+                  count(Type, Variable) %>% 
+                  spread(key = Variable, value = n) %>% 
+                  filter(HG3 >= 80, LG3 >= 80) # één volstaat; deze variabelen zijn gepaard
+              ) %>% 
+    mutate(Type = droplevels(Type)) %>% 
+    (function(df) {
+        df %>% 
+            select(Location, 
+                   Xcoord, 
+                   Ycoord, 
+                   Type, 
+                   Soiltexture, 
+                   Fysicalregion, 
+                   Ecoregion) %>% 
+            distinct() %>% 
+            write_vc("XG3metadata", sorting = c("Type",
+                                                "Location"))
+        df %>% 
+            select(Location, 
+                   HYear, 
+                   SixYearPeriod, 
+                   Variable, 
+                   Value) %>% 
+            distinct %>% 
+            write_vc("XG3observations", sorting = c("Location",
+                                                    "HYear",
+                                                    "Variable"))
+    })
+```
+
+```{r message=FALSE}
+XG3data <- 
+    read_vc("XG3metadata") %>% 
+    inner_join(
+        read_vc("XG3observations")
+    )
+```
+
+De dataset, met jaarlijkse waarden van HG3 en LG3, ziet eruit als volgt:
+
+```{r}
+XG3data %>% 
+    str(give.attr = FALSE)
+```
+
+Toelichting bij de variabelen van het dataframe:
+
+- `Location` betreft een numerieke ID van de locatie;
+- `Xcoord` en `Ycoord` betreffen de geografische coördinaten in Belgian Lambert 72 (EPSG-code 31370);
+- `Type` betreft het type (habitatsubtype / RBB);
+- `Soiltexture` is de bodemtextuur volgens drie niveaus. Het is de spatiale covariaat die we meenemen in de modellen;
+- `Fysicalregion` en `Ecoregion` zijn bijkomende ruimtelijke classificatie-eenheden, met relatief veel niveaus. We nemen ze normaliter _niet_ op in de modellen;
+- `HYear` betreft het hydrologisch jaar, getransformeerd zodat HYear = 0 voor het hydrologisch jaar 1989;
+- `SixYearPeriod` betreft de zesjarige Natura 2000 programmacyclus, genummerd vanaf 0 (periode 1989-1994);
+- `Variable` betreft de milieuvariabele: HG3 of LG3;
+- `Value` is de waarde van de milieuvariabele:
+    - LG3 en HG3 zijn de jaargemiddelden van de 3 laagste resp. 3 hoogste grondwaterstanden uit een jaarreeks van halfmaandelijkse metingen van de grondwaterstijghoogte;
+    - de waarden zijn positief en uitgedrukt in **centimeter**. Het betref het aantal centimeter dat de stijghoogte onder maaiveld staat. Groter is 'dieper';
+    - er treden geen negatieve waarden op omdat stijghoogtes boven maaiveld worden getransformeerd naar nulwaarden. Dat komt omdat stijghoogtes boven maaiveld zelden een ecologisch diffentiërende waarde hebben -- dit aspect is daarom inherent aan hoe de milieuvariabele hier wordt gedefinieerd.
+
+
+
+
+

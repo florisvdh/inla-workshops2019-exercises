@@ -1,0 +1,38 @@
+..generic:
+  optimize: yes
+  NA string: NA
+  sorting:
+  - Location
+  - HYear
+  - Variable
+  hash: 10e66c215790b81e94954a328637a17323dfa0b4
+Location:
+  class: integer
+HYear:
+  class: numeric
+SixYearPeriod:
+  class: factor
+  labels:
+  - '0'
+  - '1'
+  - '2'
+  - '3'
+  - '4'
+  index:
+  - 1
+  - 2
+  - 3
+  - 4
+  - 5
+  ordered: no
+Variable:
+  class: factor
+  labels:
+  - HG3
+  - LG3
+  index:
+  - 1
+  - 2
+  ordered: no
+Value:
+  class: numeric

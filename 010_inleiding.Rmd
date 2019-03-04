@@ -1,0 +1,105 @@
+# Inleiding
+
+Voor de INLA-workshops in maart en april is gevraagd naar een dataset om zelf mee te kunnen oefenen.
+
+INLA kan van nut zijn in de modelbouw voor de steekproefsimulaties van het grondwatermeetnet in de meetnetten natuurlijk milieu.
+Meer bepaald zijn deze simulaties nodig voor de volgende meetnetten (tussen haakjes de primair bekeken milieuvariabelen):
+
+- verdroging via het grondwater (LG3 en HG3);
+- eutrofiëring via het grondwater (N-NO3, N-NH4 en P-PO4).
+
+Met de monitoring beogen we een inferentie over toestand en trend^[
+Inferentie over de toestand (spatiotemporeel) gebeurt design-based. Inferentie over de trend (spatiotemporeel) gebeurt model-based voor de temporele component (procesbeschrijving) en design-based voor de spatiale component (consistent met toestandsbeschrijving).
+Zie voor meer info @vanderhaeghe_meetnetten_2018.],
+gestratificeerd volgens **types** (habitat(sub)types en regionaal belangrijke biotopen).
+**Gesimuleerde, realistische steekproeven** (fictieve HG3-/LG3-datasets) van verschillende omvang en uit populaties met verschillende trends (i.e. volgens verschillende _scenario's_) zijn nodig om via deze inferentie te kunnen nagaan hoeveel locaties nodig zijn van een type om een bepaalde precisie en betrouwbaarheid te bekomen van de toestands- en trendinferentie ^[
+Bemerk dat de steekproefscenario's in het geval van LG3 en HG3 geen verschillen in temporele sampling zullen onderscheiden, omdat het over continumetingen gaat.].
+Beoogde precisie en betrouwbaarheid werden middels instelwaarden gekwantificeerd.
+Bij de bepaling van de steekproefgrootte wordt idealiter rekening gehouden met het type in kwestie aangezien de variabiliteit per type sterk zal verschillen. Zie voor meer info @vanderhaeghe_meetnetten_2018.
+
+We baseren ons voor de INLA-oefening op een aangepaste subset van de data-objecten die eerder door Ivy werden samengesteld op 15 februari 2018, betreffende LG3- en HG3-waarnemingen vanaf 1989.
+LG3 en HG3 zijn de jaargemiddelden van de 3 laagste resp. 3 hoogste grondwaterstanden uit een jaarreeks van halfmaandelijkse metingen van de grondwaterstijghoogte (zie hoofdstuk \@ref(dataset) voor meer info).
+
+
+## Doelstelling
+
+De voorliggende oefening beoogt een model op te stellen, minstens voor de responsvariabele LG3, liefst ook voor de responsvariabele HG3.
+Het model moet ivm relevante steekproefsimulaties onderscheid maken tussen:
+
+- types, zowel in ligging (gemiddelde) als spreiding (variantie). De types definiëren immers de strata.
+    - Noot: er kunnen types worden gegroepeerd in functie van de databeperkingen, waardoor gelumpte types gelijk worden verondersteld. In de oefening zullen we echter voor de eenvoud alleen kijken naar _types met een redelijk aantal waarnemingen_.
+- bodemtextuur en eventuele andere verklarende ruimtegebonden variabelen waarvan de _verdeling_ voor elk type in heel Vlaanderen gekend is (dgl. variabelen zijn nuttig in poststratificatie bij design-based inferenties).
+Voor de oefening gaan we alleen werken met bodemtextuur, met drie onderscheiden niveaus, om het aantal te fitten parameters binnen de perken te houden en om de ruimtelijke component van de simulatie achteraf niet te compliceren ^[
+Bij de simulatie zullen we immers rekening houden met de feitelijke verdeling van de ruimtelijke factor van elk type in Vlaanderen.].
+- jaren, hetzij:
+    1. door een temporele trend te isoleren (trendbepaling gebeurt over minstens 12 jaar). Een dergelijk model is bruikbaar voor simulatie van steekproeven, zowel _binnen_ één zesjaarperiode (een toestandsbepaling gebeurt voor een zesjaarperiode) als over _langere_ periode (steekproeven voor trendbepaling);
+    1. door jaar-tot-jaarvariabiliteit te kwantificeren zoals te verwachten _binnen_ een zesjaarperiode (steekproeven bruikbaar louter voor toestandsbepaling).
+    
+Het model moet ook toelaten om de temporele trend in het model te vervangen door een trend, gedefinieerd door een scenario. Er wordt rekening gehouden met temporele autocorrelatie.
+
+Algemene opmerkingen:
+
+- we streven geen 'uitstekende fit' na, maar een 'aanvaardbare fit' zodanig dat steekproefsimulatie op een aanvaardbare manier kan gebeuren, rekening houdend met de bovenvermelde covariaten;
+- het onderwerp van de oefening is de modellering zelf, niet de steekproefsimulaties en de design-based inferentie achteraf.
+
+
+## Opzet
+
+### Modelvorm
+
+Het basismodel dat we fitten voor jaarlijkse LG3 of HG3, met weglating van coëfficiënten en mogelijke exponenten, smoothing functies en interacties:
+
+```
+Response = type_fixed + 
+           year_continuous_fixed + temporal autocorrelation + 
+           spatialfactor_fixed +
+           location_random + 
+           residual error
+```
+
+Hierbij neemt de _bodemtextuur_ de rol aan van `spatialfactor_fixed` en verwijst `type_fixed` naar de verschillende mogelijke _types_ in kwestie.
+De dataset wordt momenteel beperkt tot types met voldoende data; er kan nadien gekeken worden wat er gebeurt met overige types (bv. lumping met bestaande types).
+Voor de factor `types` zal dus een groter aantal parameters moeten worden geschat.
+
+Plausibele interacties zijn er tussen type, jaar (trendterm) en bodemtextuur. Gezien het grotere aantal types, gaan we in eerste instantie alleen kijken naar een _interactie tussen jaar en bodemtextuur_.
+
+Een modelvariant, bruikbaar voor simulaties in verband met de zesjaarlijkse toestand, zonder trendscenario's (en dus niet bruikbaar voor trendsimulaties), is:
+
+```
+Response = type_fixed + 
+           year_random + sixyearperiod_random +
+           spatialfactor_fixed +
+           location_random + 
+           residual error
+```
+
+Het voordeel van deze modelvorm is dat steekproefsimulatie binnen één zesjaarperiode (toestandsbepaling) mogelijk is zonder dat een trend gefit moet worden.
+Het nadeel is dat er in simulaties geen controle wordt gevoerd over de trend.
+
+
+### Relatie tot eerder modelwerk {#evolutie}
+
+Ivy heeft in 2017-2018 rapporten gemaakt van INLA-modellen voor deze datasets.
+Deze uitkomsten vormen dus een nuttige toets ter vergelijking.
+De doelstelling voor de modellen is voor deze oefening als volgt geëvolueerd t.o.v. de eerdere doelstelling:
+
+- eerst kijken we hoever we geraken op het typeniveau; dus geen a priori typegroepen (achteraf kunnen kleinere subgroepjes worden gemaakt door lumping waar nodig) ^[
+Bemerk dat voor de design-based inferentie achteraf wel gekeken wordt naar de nauwkeurigheid van schatters op het typegroepniveau; dit betreft relatief grote groepen.
+Om flexibiliteit te behouden op lange termijn, beschouwen we deze groepen echter niet als 'definitief afgebakend'.
+Dat is de reden om ze 1) niet te gebruiken voor stratificatie van de design, 2) de design te stratificeren volgens types, 3) het model voor steekproefsimulatie op het **typeniveau** te gebruiken.];
+- de dataset wordt beperkt tot types met meer data;
+- de aquatische types zijn geweerd uit de dataset, vermits deze niet op een zinvolle manier met HG3 en LG3 beschreven kunnen worden (hiervoor is een analyse nodig met een aangepaste variabele op basis van grond- en oppervlaktewaterpeilen);
+- we beschouwen maar één ruimtelijke factor, namelijk bodemtextuur;
+- we modelleren de respons met één model (geen opsplitsing tussen binomiaal en continu model);
+- de respons is niet langer gebonden aan een analyse op de logschaal, aangezien de modellen enkel dienen voor steekproefsimulatie ^[
+Het is een optie om inferenties (achteraf) op basis van gesimuleerde steekproeven wel op de logschaal uit te voeren om dit makkelijker te kunnen toetsen aan instelwaarden op de logschaal.].
+
+
+
+
+
+
+
+
+
+

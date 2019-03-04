@@ -1,0 +1,298 @@
+# Dataverkenning
+
+## Structuur van de dataset
+
+Grootte van de dataset:
+
+```{r}
+XG3data %>% 
+    count(Variable)
+```
+
+Het aantal observaties per variabele, locatie, type en jaar zou 1 moeten zijn:
+
+```{r}
+XG3data %>%
+    count(Variable, Location, Type, HYear) %>%
+    filter(n > 1) %>%
+    nrow(.) == 0
+```
+
+
+Slechts een beperkt aantal locaties is in rekening gebracht voor meer dan één type. Dit komt omdat momenteel de topologisch koppeling aan een type zonder buffers werkt, en dit dus alleen optreedt wanneer meer dan één type in HAB1 of HAB2 optreden:
+
+```{r}
+XG3data %>% 
+    distinct(Location, Type) %>% 
+    count(Location) %>% 
+    rename(Number_of_types = n) %>% 
+    filter(Number_of_types > 1)
+```
+
+Voor elke locatie en elk (hydrologisch) jaar met een LG3-observatie is ook een HG3-observatie beschikbaar, en vice-versa:
+
+```{r}
+XG3data %>% 
+    count(Location, HYear, Type) %>% 
+    distinct(n) %>% 
+    rename(Observations_per_Location_and_HYear = n)
+```
+
+
+## Beschikbaarheid aan data
+
+Deze grafieken maken we alleen voor LG3; voor HG3 zijn ze identiek (zie hoger).
+
+Het aantal observaties per type en bodemtextuurklasse:
+
+```{r}
+XG3data %>% 
+    filter(Variable == "LG3") %>% 
+    count(Type, Soiltexture) %>% 
+    ggplot(aes(x = Type, fill = Soiltexture, y = n)) +
+        geom_bar(stat = "identity", position = "stack") +
+        theme(axis.text.x =
+                  element_text(angle = 90,
+                               hjust = 1,
+                               vjust = 0.4))
+```
+
+We stellen vast:
+
+- de meeste types hebben tussen 80 en 220 observaties;
+- bij 5 types (4010, 91E0_vm, 91E0_vn, rbbhc en rbbvos) gaat het om 300 à 500 observaties;
+- de types verschillen onderling sterk in hun verdeling over de bodemtextuurklassen.
+
+
+Er zijn meer recente gegevens dan oudere en de oudere perioden hebben betrekking op een beperkter aantal types:
+
+```{r fig.height=6, fig.width=10}
+XG3data %>%
+    filter(Variable == "LG3") %>% 
+    count(HYear, Type) %>%
+    ggplot(aes(x = HYear + 1989, fill = Type, y = n)) +
+        geom_bar(stat = "identity", position = "stack")
+```
+
+
+## Kenmerken van covariaten en responsvariabele
+
+De relatieve frequentie van de bodemtextuurklassen, over alle types heen:
+
+```{r}
+XG3data %>% 
+    select(Soiltexture) %>% 
+    table %>% 
+    prop.table %>% 
+    round(2)
+```
+
+
+De histogrammen van HG3 en LG3:
+
+```{r, message=FALSE, fig.height=2, fig.width=8}
+XG3data %>%
+    ggplot(aes(x = Value)) +
+        geom_histogram() +
+        facet_wrap(~Variable, scales = "free")
+```
+
+Opvallend is de scheve verdeling, meest opvallend bij HG3. Aangezien waarden boven maaiveld zijn getransformeerd naar nul, treden logischerwijze veel nullen op bij HG3.
+
+
+Cleveland dotplots om outliers te detecteren:
+
+```{r}
+XG3data %>% 
+    group_by(Variable) %>%
+    mutate(Rank = rank(Value, 
+                       ties.method = "random")) %>% 
+    ggplot(aes(x = Value, y = Rank)) +
+    geom_point(shape = 1, 
+               size = 0.1,
+               alpha = 0.5, 
+               colour = "blue") + 
+    facet_wrap(~Variable)
+```
+
+We stellen geen outliers vast in de responsvariabele.
+
+De covariaten type, bodemtextuur en jaar werden eerder al behandeld.
+
+We bekijken de cleveland dotplots ook per bodemtextuurklasse en per type.
+
+- Er zijn geen outliers voor HG3 of LG3 per bodemtextuurklasse:
+
+
+```{r}
+XG3data %>% 
+    group_by(Variable, Soiltexture) %>%
+    mutate(Rank = rank(Value, 
+                       ties.method = "random")) %>% 
+    ggplot(aes(x = Value, y = Rank)) +
+    geom_point(shape = 1, 
+               size = 0.1,
+               alpha = 0.5, 
+               colour = "blue") + 
+    facet_grid(Soiltexture ~ Variable, 
+               scales = "free")
+```
+
+- Er zijn bij sommige types enkele outliers voor HG3 of LG3:
+
+```{r fig.height=15, fig.width=6}
+XG3data %>% 
+    group_by(Variable, Type) %>%
+    mutate(Rank = rank(Value, 
+                       ties.method = "random")) %>% 
+    ggplot(aes(x = Value, y = Rank)) +
+    geom_point(shape = 1, 
+               size = 0.1,
+               alpha = 0.5, 
+               colour = "blue") + 
+    facet_grid(Type ~ Variable, 
+               scales = "free")
+```
+
+
+## Relaties tussen variabelen
+
+De relatie tussen types en bodemtextuurklasse, en tussen types en jaren, kwam reeds hoger aan bod. Er is telkens een zekere afhankelijkheid te zien.
+
+Collineariteit tussen alle covariaten én de relaties met de respons:
+
+```{r fig.height=10, fig.width=10, message=FALSE, warning=FALSE}
+XG3data %>% 
+    spread(Variable, Value) %>% 
+    select(Type, HYear, Soiltexture, HG3, LG3) %>% 
+    GGally::ggpairs(upper = list(continuous = GGally::wrap("cor")),
+                lower = list(continuous = GGally::wrap("points", size = 0.5)),
+                cardinality_threshold = 20
+                ) %>% 
+        print(progress = FALSE)
+```
+
+We zien op deze grafiek reeds verschillende van de eerder besproken patronen. Bijkomend zien we:
+
+- locaties met 'coarse' bodemtextuur zijn pas recenter in grotere mate aanwezig in de dataset;
+- types en bodemtextuurklassen beïnvloeden duidelijk de waarde van de responsvariabelen. Dit is bij LG3 meer uitgesproken;
+- in recente jaren komen vaker hogere waarden van HG3 en LG3 voor. De overall Pearson correlatie tussen jaar en responsvariabele is nagenoeg nul;
+- HG3 en LG3 zijn positief gecorreleerd.
+
+```{r}
+#Library files for courses provided by: Highland Statistics Ltd.
+#To cite these functions, use:
+#Mixed effects models and extensions in ecology with R. (2009).
+#Zuur, AF, Ieno, EN, Walker, N, Saveliev, AA, and Smith, GM. Springer.
+
+#Copyright Highland Statistics LTD.
+
+#####################################################################
+#VIF FUNCTION.
+#To use:  corvif(YourDataFile)
+corvif <- function(dataz) {
+  dataz <- as.data.frame(dataz)
+  
+  #vif part
+  form    <- formula(paste("fooy ~ ",paste(strsplit(names(dataz)," "),collapse=" + ")))
+  dataz   <- data.frame(fooy=1 + rnorm(nrow(dataz)) ,dataz)
+  lm_mod  <- lm(form,dataz)
+  
+  cat("\n\nVariance inflation factors\n\n")
+  print(myvif(lm_mod))
+}
+
+
+#Support function for corvif. Will not be called by the user
+myvif <- function(mod) {
+  v <- vcov(mod)
+  assign <- attributes(model.matrix(mod))$assign
+  if (names(coefficients(mod)[1]) == "(Intercept)") {
+    v <- v[-1, -1]
+    assign <- assign[-1]
+  } else warning("No intercept: vifs may not be sensible.")
+  terms <- labels(terms(mod))
+  n.terms <- length(terms)
+  if (n.terms < 2) stop("The model contains fewer than 2 terms")
+  if (length(assign) > dim(v)[1] ) {
+    diag(tmp_cor)<-0
+    if (any(tmp_cor==1.0)){
+      return("Sample size is too small, 100% collinearity is present")
+    } else {
+      return("Sample size is too small")
+    }
+  }
+  R <- cov2cor(v)
+  detR <- det(R)
+  result <- matrix(0, n.terms, 3)
+  rownames(result) <- terms
+  colnames(result) <- c("GVIF", "Df", "GVIF^(1/2Df)")
+  for (term in 1:n.terms) {
+    subs <- which(assign == term)
+    result[term, 1] <- det(as.matrix(R[subs, subs])) * det(as.matrix(R[-subs, -subs])) / detR
+    result[term, 2] <- length(subs)
+  }
+  if (all(result[, 2] == 1)) {
+    result <- data.frame(GVIF=result[, 1])
+  } else {
+    result[, 3] <- result[, 1]^(1/(2 * result[, 2]))
+  }
+  invisible(result)
+}
+#END VIF FUNCTIONS
+```
+
+We berekenen de variance inflation factors om collineariteit te objectiveren:
+
+```{r}
+XG3data %>% 
+    spread(Variable, Value) %>% 
+    select(Type, HYear, Soiltexture) %>% 
+    corvif()
+```
+
+We zien hier geen heel hoge waarden; de collineariteit valt dus nog mee.
+
+
+
+## De zin van interacties
+
+We visualiseren het effect van bodemtextuur op de relatie tussen jaar en respons:
+
+```{r message=FALSE, fig.height=7}
+XG3data %>% 
+    ggplot(aes(x = HYear, y = Value)) +
+    geom_point(size = 0.5) +
+    geom_smooth(se = FALSE) +
+    facet_grid(Soiltexture ~ Variable,
+               scales = "free")
+```
+
+Afgaande op deze figuur lijkt een interactie tussen bodemtextuur en jaar gerechtvaardigd; het is niet duidelijk of dit significant zal zijn.
+
+We gingen er van uit dat interacties met `Type` niet haalbaar zijn; we visualiseren echter het verband (resp. interactie met jaar en met bodemtextuur):
+
+```{r message=FALSE, fig.width=6, fig.height=20}
+XG3data %>% 
+    ggplot(aes(x = HYear, y = Value)) +
+    geom_point(size = 0.5) +
+    geom_smooth(se = FALSE) +
+    facet_grid(Type ~ Variable,
+               scales = "free")
+```
+
+Er lijken verschillen tussen types in de relatie tussen jaar en respons; dit is echter ten dele omdat bij sommige types niet de volledige range in jaren beschikbaar is in de dataset. Verder is het mogelijk dat bodemtextuur voor verklaring van deze verschillen kan zorgen (niet steeds alle locaties zijn aanwezig over de hele periode).
+
+```{r message=FALSE, fig.width=6, fig.height=15}
+XG3data %>% 
+    ggplot(aes(x = Soiltexture, y = Value)) +
+    geom_boxplot() +
+    facet_grid(Type ~ Variable,
+               scales = "free") +
+    coord_flip()
+```
+
+In de data blijkt een afhankelijkheid van type, in de relatie tussen bodemtextuur en respons. Een deel hiervan wordt mogelijks verklaard door een jaareffect (niet steeds alle locaties zijn aanwezig over de hele periode).
+
+
+

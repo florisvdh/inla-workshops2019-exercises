@@ -1,0 +1,204 @@
+..generic:
+  optimize: yes
+  NA string: NA
+  sorting:
+  - Type
+  - Location
+  hash: 076e79f0814e0062c818cbe39e748914f6507d89
+Location:
+  class: integer
+Xcoord:
+  class: numeric
+Ycoord:
+  class: numeric
+Type:
+  class: factor
+  labels:
+  - 2130_had
+  - 2130_hd
+  - '2160'
+  - 2190_mp
+  - '4010'
+  - '6430'
+  - 7140_meso
+  - 7140_oli
+  - '9120'
+  - 91E0_va
+  - 91E0_vm
+  - 91E0_vn
+  - 91E0_vo
+  - rbbhc
+  - rbbhf
+  - rbbmc
+  - rbbmr
+  - rbbsf
+  - rbbvos
+  index:
+  - 1
+  - 2
+  - 3
+  - 4
+  - 5
+  - 6
+  - 7
+  - 8
+  - 9
+  - 10
+  - 11
+  - 12
+  - 13
+  - 14
+  - 15
+  - 16
+  - 17
+  - 18
+  - 19
+  ordered: no
+Soiltexture:
+  class: factor
+  labels:
+  - Fine
+  - Coarse
+  - Peat
+  index:
+  - 1
+  - 2
+  - 3
+  ordered: no
+Fysicalregion:
+  class: factor
+  labels:
+  - Westelijke Boomse Cuesta.Gronden van de hooggelegen cuestadelen, dekzandruggen
+    en stuifduinen
+  - W-Vlaams Cuestaland.Gronden van de hooggelegen landschapsdelen
+  - Depressie van de Netes.Gronden van de hoogstgelegen landschapsdelen
+  - Hagelands Heuvelland.Gronden van de hoogstgelegen landschapsdelen
+  - Polder-Leie Interfluvium.Gronden van de hoogstgelegen landschapsdelen
+  - Hagelands Heuvelland.Gronden van de intermediaire landschapsdelen
+  - Centrale Vlaamse Laagvlakte.Gronden van dekzandruggen en stuifduinen
+  - Depressie van de Netes.Gronden van depressies en alluvia
+  - Hagelands Heuvelland.Gronden van depressies en alluvia
+  - Kempische Cuesta.Gronden van depressies en alluvia
+  - Maasterrassen.Gronden van depressies en alluvia
+  - Plateau van Haspengouw.Gronden van depressies en alluvia
+  - Heuvelland van Lummen.Gronden van de Tertiaire heuvels en dekzandruggen
+  - Maasvlakte.Gronden van geulvormige depressies
+  - Kustvlakte.Gronden van het duingebied
+  - Kustvlakte.Gronden van het overgangsgebied naar de zandstreek
+  - Brabants Plateau.Gronden van hogergelegen plateaudelen
+  - Schelde-Dender Interfluvium.Gronden van hooggelegen plateaudelen en lagere ruggen
+  - Dender-Zenne Interfluvium.Gronden van hooggelegen plateaudelen, ruggen en rivierstuifwallen
+  - Depressie van de Netes.Gronden van laagplateaus en valleiranden
+  - Kempische Cuesta.Gronden van laagplateaus en valleiranden
+  - Zuidelijke Vlaamse Laagvlakte.Gronden van natte depressies
+  - Brabants Plateau.Gronden van natte depressies en alluvia
+  - Centrale Vlaamse Laagvlakte.Gronden van natte depressies en alluvia
+  - Dender-Zenne Interfluvium.Gronden van natte depressies en alluvia
+  - Heuvelland van Lummen.Gronden van natte depressies en alluvia
+  - Leie-Schelde Interfluvium.Gronden van natte depressies en alluvia
+  - Oostelijke Vlaamse Laagvlakte.Gronden van natte depressies en alluvia
+  - Polder-Leie Interfluvium.Gronden van natte depressies en alluvia
+  - Schelde-Dender Interfluvium.Gronden van natte depressies en alluvia
+  - Vlakte van Zonhoven.Gronden van natte depressies en alluvia
+  - W-Vlaams Cuestaland.Gronden van natte depressies en alluvia
+  - Westelijke Boomse Cuesta.Gronden van natte depressies en alluvia
+  - Centrale Boomse Cuesta.Gronden van ondiepe depressies en alluvia
+  - Oostelijke Boomse Cuesta.Gronden van ondiepe depressies en alluvia
+  - Scheldepolders.Gronden van oude kreekgeulen en uitgeveende gronden
+  - Kempische Cuesta.Gronden van relatief hooggelegen en soms reliefrijke landschapsdelen
+  - Maasterrassen.Gronden van relatief laaggelegen landschapsdelen en van valleiranden
+  - Centrale Boomse Cuesta.Gronden van vlakke laagplateaus en van valleiranden
+  - Heuvelland van Lummen.Gronden van vlakke laagplateaus en van valleiranden
+  - W-Vlaams Cuestaland.Gronden van vlakke laagten en valleiranden
+  - Dender-Zenne Interfluvium.Gronden van vrij laaggelegen en relatief vlakke landschapsdelen
+  - Schelde-Dender Interfluvium.Gronden van vrij laaggelegen en relatief vlakke landschapsdelen
+  - Oostelijke Vlaamse Laagvlakte.Gronden van weinig verheven ruggen en stuifduinen
+  - Westelijke Boomse Cuesta.Gronden van zwakke depressies
+  - Zuidelijke Vlaamse Laagvlakte.Gronden van zwakke ruggen en kouters
+  - Maasterrassen.Gronden v. hooggelegen en dikwijls reliefrijke landschapsdelen
+  - Kustvlakte.Kunstmatige gronden
+  - Kustvlakte.Poldergronden
+  - Plateau van Haspengouw.Relatief laag gelegen gronden
+  - Scheldepolders.Relatief weinig opgeslibde gronden
+  index:
+  - 1
+  - 2
+  - 3
+  - 4
+  - 5
+  - 6
+  - 7
+  - 8
+  - 9
+  - 10
+  - 11
+  - 12
+  - 13
+  - 14
+  - 15
+  - 16
+  - 17
+  - 18
+  - 19
+  - 20
+  - 21
+  - 22
+  - 23
+  - 24
+  - 25
+  - 26
+  - 27
+  - 28
+  - 29
+  - 30
+  - 31
+  - 32
+  - 33
+  - 34
+  - 35
+  - 36
+  - 37
+  - 38
+  - 39
+  - 40
+  - 41
+  - 42
+  - 43
+  - 44
+  - 45
+  - 46
+  - 47
+  - 48
+  - 49
+  - 50
+  - 51
+  ordered: no
+Ecoregion:
+  class: factor
+  labels:
+  - Ecoregio van de cuesta's
+  - Ecoregio van de grindrivieren
+  - Ecoregio van de Kempen
+  - Ecoregio van de krijt-leemgebieden
+  - Ecoregio van de krijtgebieden
+  - Ecoregio van de kustduinen
+  - Ecoregio van de Midden-Vlaamse overgangsgebieden
+  - Ecoregio van de Pleistocene riviervalleien
+  - Ecoregio van de polders en de getijdenschelde
+  - Ecoregio van de westelijke interfluvia
+  - Ecoregio van de zuidoostelijke heuvelzone
+  - Ecoregio van de zuidwestelijke heuvelzone
+  index:
+  - 1
+  - 2
+  - 3
+  - 4
+  - 5
+  - 6
+  - 7
+  - 8
+  - 9
+  - 10
+  - 11
+  - 12
+  ordered: no

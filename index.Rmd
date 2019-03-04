@@ -1,9 +1,9 @@
 ---
-title: "Rapporttitel"
-subtitle: "Subtitel"
-author: "Auteurs"
-reportnr: "Rapportnummer"
-date: "Datum"
+title: "Oefening: INLA-modellen voor steekproefsimulatie in het grondwatermeetnet (stijghoogtes)"
+# subtitle: "Subtitel"
+author: "Floris Vanderhaeghe"
+# reportnr: "Rapportnummer"
+date: "Voorjaar 2019"
 link-citations: true
 linkcolor: link.colour
 citecolor: link.colour
@@ -12,13 +12,14 @@ geometry: margin=1in
 mainfont: "Calibri"
 fontsize: 11pt
 documentclass: "article"
-# csl: ../../inbo.csl
-# bibliography: ../../references.bib
+csl: inbo.csl
+bibliography: references.bib
 site: bookdown::bookdown_site
 output:
   bookdown::html_document2:
     keep_md: TRUE
     number_sections: yes
+    code_folding: hide
     fig_caption: yes
     df_print: paged
     toc: TRUE
@@ -39,7 +40,7 @@ library(pander)
 library(git2rdata)
 uitvoer <- knitr::opts_knit$get("rmarkdown.pandoc.to")
 opts_chunk$set(
-  echo = FALSE,
+  echo = TRUE,
   dpi = 300
 )
 ```
