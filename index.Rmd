@@ -14,6 +14,7 @@ fontsize: 11pt
 documentclass: "article"
 csl: inbo.csl
 bibliography: references.bib
+github-repo: florisvdh/inla-workshops2019-exercises
 site: bookdown::bookdown_site
 output:
   bookdown::html_document2:
@@ -45,4 +46,4 @@ opts_chunk$set(
 )
 ```
 
-
+Noot: de broncode voor dit document is te vinden op <https://github.com/florisvdh/inla-workshops2019-exercises>.
