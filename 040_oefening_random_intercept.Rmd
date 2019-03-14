@@ -228,17 +228,109 @@ I3$summary.random$Location
 
 
 ### what is the default prior for `'iid'` (`inla.doc('iid')`)
+
 ### calculate $\sigma$ for the random intercept
+
 ### display the BLUP the random intercept
+
+
 
 ## Challenge 4
 
 ### Think about the relevant magnitude of $\sigma$ for your random effect
+
 ### Use a custom "pc.prec" prior with that $\sigma$ (`inla.doc("pc.prec")`)
+
+
 
 
 ## Challenge 5
 
+Vanaf hier heb ik de workshop bijgewoond.
+
 ### pick a relevant variable for an 'rw1' model
+
+We nemen `HYear`.
+Thierry zegt dat je in elk geval 'jaar' moet centreren (niet schalen), maar daarbij is een reeks die start vanaf nul ook goed.
+
 ### ponder on a relevant $\sigma$ for that model
+
+Beschikbare patronen op locaties met minstens 5 geobserveerde jaren:
+
+```{r message = FALSE, fig.width=10, fig.height=10}
+lg3data %>% 
+    count(Location) %>% 
+    filter(n >= 5) %>% 
+    right_join(lg3data) %>% 
+    ggplot(aes(x = HYear, y = Response, group = Location, colour = as.factor(Location))) + 
+    # geom_point(size = 2, alpha = 0.3) +
+    geom_line() +
+    facet_wrap(~Type, scales = "free_y") +
+    theme(legend.position = "none")
+```
+
+Voor een sigma = 50 ligt 95% van de sprongen tussen -100 en +100. Dit lijkt wel te kunnen.
+
+```{r}
+rw1 <- simulate_rw(sigma = 50, length = 28, start = 0)
+```
+
+```{r fig.width=10, fig.height=15}
+rw1 %>% 
+    filter(replicate %in% 1:179) %>% 
+    mutate(replicategroup = floor(replicate/20)) %>%
+    ggplot(aes(x = x, y = y, group = replicate, 
+               colour = as.factor(replicate))) +
+    geom_line() +
+    facet_wrap(~replicategroup) +
+    theme(legend.position = "none")
+```
+
+
+Bemerk dat `select_change()` wel een vrij stringente selectie is!
+
+```{r fig.height=8, fig.width=8}
+plot(select_change(rw1))
+```
+
+```{r}
+plot(select_divergence(rw1))
+```
+
+
+
+```{r}
+plot(select_poly(rw1, coefs = c(0, 1, 1)))
+```
+
+```{r}
+plot(select_quantile(rw1))
+```
+
+
+
 ### fit model with 'rw1' component and `pc.prec` prior
+
+Dit omzetten naar een precision prior, vereist ook een alpha.
+Aangezien je een sigma kiest die eerder de extremen toelaat, combineer je dat met een alpha van 0.05.
+
+```{r}
+I4 <- inla(Response ~ Type + Soiltexture +
+               f(HYear, model = "rw1",
+                     hyper = list(
+                       theta = list(prior = "pc.prec", param = c(50, 0.05)))),
+           data = lg3data,
+           control.compute = list(waic = TRUE),
+           family = "gaussian") # gaussian is the default!
+summary(I4)
+```
+
+Dus WAIC is lager.
+
+
+
+
+
+
+
+
