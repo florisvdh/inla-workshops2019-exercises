@@ -103,8 +103,39 @@ system.time(inla(Response ~ Type + Soiltexture + HYear_std,
 ## Challenge 2
 
 ### what is the default prior for a fixed effect (`?control.fixed`)
+
+According to the slides of A. Zuur, it is a default of mean = $0$ with precision =$0.001$, i.e. a $\sigma^2$ of $1/0.001 = 1000$, so a $\sigma$ of approx. $31.6$.
+
+Confirmed by `?control.fixed`.
+
+
 ### use a custom prior for a fixed effect (`?inla`)
+
+Laat ons even veronderstellen dat we weten dat de LG3 gemiddeld stijgt met een snelheid van 2 cm per jaar, met een precisie van 10000. Opgelet: stijgen betekent in dit geval dat de respons zakt (diepte onder maaiveld: positief uitgedrukt).
+
+We gaan werken met de niet-getransformeerde HYear om de interpretatie wat makkelijker te houden.
+
+Op basis van code van A. Zuur:
+
+```{r}
+I2 <- inla(Response ~ Type + Soiltexture + HYear,
+           data = lg3data,
+           control.compute = list(waic = TRUE),
+           control.fixed = list(
+                     mean = list(
+                          HYear = -2),
+                     prec = list(
+                          HYear = 10000)))
+summary(I2)
+```
+
+We zien dat we de coëfficiënt met een informatieve prior kunnen 'forceren'.
+
+
 ### specify two linear combinations [r-inla.org, FAQ 17](http://www.r-inla.org/faq#TOC-I-have-some-linear-combinations-of-the-nodes-in-the-latent-field-that-I-want-to-compute-the-posterior-marginal-of-is-that-possible-)
+
+Overgeslagen.
+
 
 
 ## Challenge 3
