@@ -204,7 +204,7 @@ Marginal log-Likelihood:  -20580.58
 Posterior marginals for linear predictor and fitted values computed
 ```
 
-```{r}
+```{r eval=FALSE}
 I3$summary.hyperpar
 ```
 
@@ -219,9 +219,11 @@ Dus: lage waarde voor de residuele precisie, hoge waarde voor de locatieprecisie
  
 > We did not center year! Dangerous!
 
+Zie echter verder opmerking Thierry; geen probleem omdat we bij nul beginnen.
+
 Dit zijn de random effecten:
 
-```{r}
+```{r eval=FALSE}
 I3$summary.random$Location
 ```
 
