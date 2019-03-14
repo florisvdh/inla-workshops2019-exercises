@@ -141,6 +141,86 @@ Overgeslagen.
 ## Challenge 3
 
 ### fit a model with one or more random intercepts (`model = 'iid'`)
+
+Op basis van code van A. Zuur:
+
+```{r eval=FALSE}
+I3 <- inla(Response ~ Type + Soiltexture + HYear +
+               f(Location, model = "iid"),
+           data = lg3data,
+           control.compute = list(waic = TRUE)
+           )
+summary(I3)
+```
+
+Dit is de output (model heeft ca. 1 minuut nodig):
+
+```
+Call:
+c("inla(formula = Response ~ Type + Soiltexture + HYear + f(Location, ",  "    model = \"iid\"), data = lg3data, control.compute = list(waic = TRUE))" )
+
+Time used:
+ Pre-processing    Running inla Post-processing           Total 
+         0.3266         54.0089         10.3541         64.6897 
+
+Fixed effects:
+                      mean     sd 0.025quant 0.5quant 0.975quant     mode kld
+(Intercept)        97.7989 6.5971    84.8494  97.7988   110.7412  97.7989   0
+Type2130_hd        25.0302 8.7435     7.8637  25.0300    42.1855  25.0302   0
+Type2160           26.1533 8.0035    10.4398  26.1531    41.8582  26.1533   0
+Type2190_mp        -7.8639 9.3075   -26.1377  -7.8642    10.3990  -7.8639   0
+Type4010          -46.8628 7.0416   -60.6878 -46.8630   -33.0449 -46.8628   0
+Type6430          -11.7424 7.4274   -26.3249 -11.7426     2.8319 -11.7424   0
+Type7140_meso     -64.3994 7.9100   -79.9293 -64.3996   -48.8771 -64.3994   0
+Type7140_oli      -79.9317 8.7741   -97.1580 -79.9319   -62.7138 -79.9317   0
+Type9120            4.0569 8.0586   -11.7650   4.0566    19.8700   4.0569   0
+Type91E0_va        -4.1596 7.4174   -18.7222  -4.1598    10.3965  -4.1596   0
+Type91E0_vm       -46.8385 6.7587   -60.1080 -46.8387   -33.5750 -46.8385   0
+Type91E0_vn       -29.4643 7.3775   -43.9488 -29.4645   -14.9868 -29.4643   0
+Type91E0_vo       -59.2053 8.1655   -75.2369 -59.2055   -43.1816 -59.2053   0
+Typerbbhc         -46.0617 6.7418   -59.2979 -46.0619   -32.8308 -46.0617   0
+Typerbbhf         -24.5694 8.0384   -40.3514 -24.5696    -8.7960 -24.5694   0
+Typerbbmc         -46.6864 7.8593   -62.1167 -46.6866   -31.2630 -46.6864   0
+Typerbbmr         -39.1331 7.2719   -53.4101 -39.1333   -24.8625 -39.1331   0
+Typerbbsf         -26.7070 8.9970   -44.3712 -26.7073    -9.0529 -26.7070   0
+Typerbbvos         -6.8547 9.0736   -24.6693  -6.8550    10.9491  -6.8547   0
+SoiltextureCoarse  19.3654 3.3420    12.8041  19.3653    25.9220  19.3654   0
+SoiltexturePeat   -12.6601 3.7587   -20.0395 -12.6603    -5.2863 -12.6601   0
+HYear              -0.4107 0.1436    -0.6927  -0.4107    -0.1290  -0.4107   0
+
+Random effects:
+Name	  Model
+ Location   IID model 
+
+Model hyperparameters:
+
+Expected number of effective parameters(std dev): 570.89(6.838)
+Number of equivalent replicates : 7.075 
+
+Watanabe-Akaike information criterion (WAIC) ...: 38629.20
+Effective number of parameters .................: 207.37
+
+Marginal log-Likelihood:  -20580.58 
+Posterior marginals for linear predictor and fitted values computed
+```
+
+```{r}
+I3$summary.hyperpar
+```
+
+Dus: lage waarde voor de residuele precisie, hoge waarde voor de locatieprecisie. Dus veel residuele variatie (sigma 38.6), weinig variatie tussen locaties (sigma 0.006).
+
+```{r}
+1/sqrt(6.718229e-04)
+1/sqrt(2.201755e+04)
+```
+
+ Maar (citaat uit een les van A. Zuur):
+ 
+> We did not center year! Dangerous!
+
+
+
 ### what is the default prior for `'iid'` (`inla.doc('iid')`)
 ### calculate $\sigma$ for the random intercept
 ### display the BLUP the random intercept
