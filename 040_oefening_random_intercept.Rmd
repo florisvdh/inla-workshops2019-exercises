@@ -219,6 +219,12 @@ Dus: lage waarde voor de residuele precisie, hoge waarde voor de locatieprecisie
  
 > We did not center year! Dangerous!
 
+Dit zijn de random effecten:
+
+```{r}
+I3$summary.random$Location
+```
+
 
 
 ### what is the default prior for `'iid'` (`inla.doc('iid')`)
