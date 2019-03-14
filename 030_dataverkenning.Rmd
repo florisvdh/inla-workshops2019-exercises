@@ -1,5 +1,18 @@
 # Dataverkenning
 
+Nog verder aan te vullen: uit onderstaande lijst is nog F te behandelen (in termen van: voldoende data?), G en H.
+
+```
+# A Missing values?
+# B Outliers in Y / Outliers in X
+# C Collinearity X
+# D Relationships Y vs X
+# E Spatial/temporal aspects of sampling design
+# F Interactions (is the quality of the data good enough to include them?)
+# G Zero inflation Y
+# H Are categorical covariates balanced?
+```
+
 ## Structuur van de dataset
 
 Grootte van de dataset:
