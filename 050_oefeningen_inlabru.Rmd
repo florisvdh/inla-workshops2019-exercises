@@ -1,16 +1,21 @@
-# Oefeningen inlabru
+# Workshop 2: oefeningen inlabru
 
 Een aantal zaken worden overgenomen van workshop 1, met het doel om dit nu met `inlabru` te modelleren.
 
-### fit fixed effect model
+## fit fixed effect model
 
-Probleem met factoren:
+Het volgende geeft een probleem met factoren:
 
-```{r}
+```{r eval=FALSE}
 I1 <- bru(Response ~ Type + Soiltexture + HYear,
            data = lg3data,
            family = "gaussian") # gaussian is the default!
 ```
+
+```
+invalid factor level, NA generatedinvalid factor level, NA generated
+```
+
 
 Aanpassing voor factoren: we maken extra dummy-variabelen aan:
 
@@ -23,9 +28,13 @@ lg3data <-
     bind_cols(lg3data, .)
 ```
 
+```{r}
+lg3data %>% str
+```
+
+
 
 ```{r}
-# lg3data %>% str
 lg3data_typestring <-
     lg3data %>% 
     select(matches("Type.+")) %>% 
@@ -90,6 +99,50 @@ Ibru1 %>% plot("Type2130_hd")
 ```{r}
 Ibru1 %>% plot("HYear")
 ```
+
+## fit random effect model
+
+We zullen eens `Type` en `Location` als random factoren onderscheiden.
+
+```{r}
+lg3data_ran <-
+    lg3data %>% 
+    mutate(type_ran = as.integer(Type),
+           loc_ran = as.integer(factor(Location)))
+nrlevels_type <- length(unique(lg3data$Type))
+nrlevels_loc <- length(unique(lg3data$Location))
+Ibru2 <- bru(Response ~ HYear + SoiltextureCoarse + SoiltexturePeat +
+                 Type_ran(map = type_ran, model = "iid", n = nrlevels_type) +
+                 Loc_ran(map = loc_ran, model = "iid", n = nrlevels_loc),
+           data = lg3data_ran,
+           family = "gaussian") # gaussian is the default!
+```
+
+```{r}
+Ibru2 %>% names
+```
+
+```{r}
+Ibru2 %>% summary
+```
+
+```{r}
+# Ibru2$marginals.fixed %>% str
+```
+
+
+```{r}
+Ibru2$summary.fitted.values %>% str
+```
+
+```{r}
+Ibru2 %>% plot("Type_ran")
+```
+
+
+
+
+
 
 
 
