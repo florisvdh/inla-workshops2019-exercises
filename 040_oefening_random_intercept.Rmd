@@ -1,0 +1,81 @@
+# Workshop 1: random intercept models met INLA
+
+Zie <https://inbo.github.io/tutorials/tutorials/r_inla/>
+
+We beperken de data voorlopig tot de LG3-respons.
+
+```{r}
+lg3data <- 
+    XG3data %>% 
+    filter(Variable == "LG3") %>% 
+    rename(Response = Value) %>% 
+    select(-Variable)
+lg3data %>% str
+```
+
+
+## Challenge 1
+
+### fit fixed effect model
+
+```{r}
+I1 <- inla(Response ~ Type + Soiltexture + HYear,
+           data = lg3data,
+           control.compute = list(dic = TRUE, waic = TRUE),
+           family = "gaussian") # gaussian is the default!
+summary(I1)
+```
+
+
+### extract $WAIC$ from the model
+
+```{r}
+I1 %>% names
+```
+
+```{r}
+I1$waic %>% str
+```
+
+```{r}
+I1$waic$waic
+```
+
+
+### display fixed effect parameters in a table
+
+```{r}
+I1$summary.fixed %>% 
+    rownames_to_column(var = "Fixed_effect") %>% 
+    select(Fixed_effect, mean, `0.025quant`, `0.975quant`) %>% 
+    kable
+```
+
+
+
+
+## Challenge 2
+
+### what is the default prior for a fixed effect (`?control.fixed`)
+### use a custom prior for a fixed effect (`?inla`)
+### specify two linear combinations [r-inla.org, FAQ 17](http://www.r-inla.org/faq#TOC-I-have-some-linear-combinations-of-the-nodes-in-the-latent-field-that-I-want-to-compute-the-posterior-marginal-of-is-that-possible-)
+
+
+## Challenge 3
+
+### fit a model with one or more random intercepts (`model = 'iid'`)
+### what is the default prior for `'iid'` (`inla.doc('iid')`)
+### calculate $\sigma$ for the random intercept
+### display the BLUP the random intercept
+
+## Challenge 4
+
+### Think about the relevant magnitude of $\sigma$ for your random effect
+### Use a custom "pc.prec" prior with that $\sigma$ (`inla.doc("pc.prec")`)
+
+
+## Challenge 5
+
+### pick a relevant variable for an 'rw1' model
+### ponder on a relevant $\sigma$ for that model
+### fit model with 'rw1' component and `pc.prec` prior
