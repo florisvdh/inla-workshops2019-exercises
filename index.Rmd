@@ -40,6 +40,8 @@ library(googlesheets)
 library(pander)
 library(git2rdata)
 library(INLA)
+library(inlatools)
+library(inlabru)
 uitvoer <- knitr::opts_knit$get("rmarkdown.pandoc.to")
 opts_chunk$set(
   echo = TRUE,
