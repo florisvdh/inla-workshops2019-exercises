@@ -51,8 +51,54 @@ I1$summary.fixed %>%
     kable
 ```
 
+Citaat uit script `Ex719C_Otolith_V4.R` van A. Zuur:
 
+```
+# To make the numerical estimation process 
+# easier, we standardize all continous 
+# covariates.
+```
 
+Laten we dus het volgende proberen en het resultaat vergelijken:
+
+```{r}
+MyStd <- function(x) { (x - mean(x)) / sd(x)} # van A. Zuur
+lg3data <- 
+    lg3data %>% 
+    mutate(HYear_std = MyStd(HYear))
+```
+
+```{r}
+inla(Response ~ Type + Soiltexture + HYear_std,
+           data = lg3data,
+           control.compute = list(dic = TRUE, waic = TRUE),
+           family = "gaussian") %>% 
+    .$summary.fixed %>% 
+    rownames_to_column(var = "Fixed_effect") %>% 
+    select(Fixed_effect, mean, `0.025quant`, `0.975quant`) %>% 
+    kable
+```
+
+De coëfficiënt van HYear is uiteraard veranderd!
+Ook het intercept is veranderd.
+Overige parameters zijn niet duidelijk anders.
+
+De snelheid is nauwelijks verbeterd.
+Dit heeft mogelijks te maken met het feit dat `HYear` reeds relatief lage waarden had (variërend van 0 tot 27).
+
+```{r}
+system.time(inla(Response ~ Type + Soiltexture + HYear,
+           data = lg3data,
+           control.compute = list(dic = TRUE, waic = TRUE),
+           family = "gaussian"))
+```
+
+```{r}
+system.time(inla(Response ~ Type + Soiltexture + HYear_std,
+           data = lg3data,
+           control.compute = list(dic = TRUE, waic = TRUE),
+           family = "gaussian"))
+```
 
 ## Challenge 2
 
