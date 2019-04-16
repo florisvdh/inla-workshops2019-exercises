@@ -1,0 +1,164 @@
+# Workshop 3: oefeningen spatiaal
+
+Een aantal zaken worden overgenomen van workshop 1, met het doel om dit nu met spatiale correlatie te modelleren.
+
+## Pearson residuals en variogram
+
+```{r eval=FALSE}
+inla.doc("gaussian")
+```
+
+We hernemen de summary van model `I1`:
+
+```{r}
+summary(I1)
+```
+
+We voegen de Pearson residuals toe aan de dataset:
+
+```{r}
+lg3data_I1 <- 
+    lg3data %>% 
+    mutate(mu = I1$summary.fitted.values$mean, 
+            sigma2 = 1 / I1$summary.hyperpar[1, "mean"], 
+            Pearson_I1 = (Response - mu) / sqrt(sigma2))
+```
+
+
+```{r}
+lg3data_I1 %>% str
+```
+
+
+Berekenen van het variogram:
+
+- met een width van 5 meter:
+
+```{r}
+I1_vario <- 
+    variogram(Pearson_I1 ~ 1, 
+              locations = ~Xcoord + Ycoord, 
+              data = lg3data_I1, 
+              cressie = TRUE,
+              width = 20,
+              cutoff = 500)
+```
+
+```{r}
+I1_vario %>% str(give.attr = FALSE)
+```
+
+```{r}
+I1_vario %>% 
+    ggplot(aes(x = dist, y = np)) + 
+    geom_point()
+```
+
+```{r message=FALSE}
+I1_vario %>% 
+    ggplot(aes(x = dist, y = gamma)) +
+    geom_point() +
+    geom_smooth()
+```
+
+Dit suggereert een range van 150 m.
+
+We zagen patronen op verschillende afstanden optreden.
+Het patroon op korte afstand is het meest belangrijk: we willen die uit de data isoleren.
+
+- bv. met een width van 5 km (geen interesse daarin):
+
+```{r}
+I1_vario2 <- 
+    variogram(Pearson_I1 ~ 1, 
+              locations = ~Xcoord + Ycoord, 
+              data = lg3data_I1, 
+              cressie = TRUE,
+              width = 5000)
+```
+
+```{r}
+I1_vario2 %>% 
+    ggplot(aes(x = dist, y = np)) + 
+    geom_point()
+```
+
+```{r message=FALSE}
+I1_vario2 %>% 
+    ggplot(aes(x = dist, y = gamma)) +
+    geom_point() +
+    geom_smooth()
+```
+
+Aangezien er ook een variogram is op een hoger niveau, zou je ook 2 afzonderlijke meshes kunnen gaan maken voor INLA, één voor elk niveau. Of: wat hier wellicht relevanter (en haalbaarder) is:
+
+- buffer creëren rond de punten om aaneensluitende gebiedjes aan te maken (gebruik enkele keren de range als buffer)
+- creëer enkel een mesh binnen de gebiedjes
+- gebruik de gebiedjes daarnaast als random intercept.
+
+
+## Modelvoorbereidingen
+
+```{r}
+gw_buffer <- 
+    lg3data %>% 
+    st_as_sf(coords = c("Xcoord", "Ycoord"), crs = 31370) %>% 
+    st_buffer(dist = 400) %>% 
+    st_union()
+```
+
+```{r fig.width=12}
+gw_buffer %>% 
+    ggplot() +
+    geom_sf()
+```
+
+We nemen alleen provincie Antwerpen:
+
+```{r}
+gw_bufferantw <- 
+    gw_buffer %>% 
+    st_intersection(provinces[1,])
+```
+
+```{r}
+gw_bufferantw %>% 
+    ggplot() +
+    geom_sf()
+```
+
+
+### Mesh berekenen
+
+```{r}
+data("BE_ADMIN_REGION") # load spatial object at provincial level
+Vlaanderen <- st_as_sf(BE_ADMIN_REGION) %>%
+                  filter(TX_RGN_DESCR_NL == 'Vlaams Gewest') %>% 
+                  st_transform(31370)
+Vlaanderen
+```
+
+```{r}
+mesh <- inla.mesh.2d(boundary = gw_bufferantw %>% as("Spatial"),
+             max.edge = 50,
+             cutoff = 10)
+ggplot() + gg(mesh) + coord_fixed() + 
+  ggtitle(paste("Vertices: ", mesh$n))
+```
+
+Dit zijn nog heel veel vertices.
+
+We zouden nog een kleinere subset kunnen nemen.
+
+### SPDE berekenen
+
+Doe dit zelf!
+
+Je zou kunnen als priors nemen:
+
+```
+prior.sigma = c(150, 0.5)
+prior.sigma = c(0.5, 0.05)
+```
+
+
