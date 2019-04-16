@@ -309,3 +309,26 @@ In de data blijkt een afhankelijkheid van type, in de relatie tussen bodemtextuu
 
 
 
+
+## Ruimtelijke spreiding van de data
+
+```{r fig.width = 12}
+# Get Flemish provinces
+data("BE_ADMIN_PROVINCE") # load spatial object at provincial level
+provinces_be <- st_as_sf(BE_ADMIN_PROVINCE) # convert to sf-object
+provinces <-
+  provinces_be %>%
+  filter(TX_RGN_DESCR_NL == 'Vlaams Gewest') %>% 
+  st_transform(31370)
+
+ggplot() +
+    # geom_sf(data = provinces) +
+    geom_point(data = XG3data %>% filter(Variable == "LG3"),
+    aes(x = Xcoord, y = Ycoord),
+               size = 0.2) +
+    coord_fixed()
+```
+
+
+
+

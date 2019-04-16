@@ -33,6 +33,7 @@ output:
 
 ```{r setup, include=FALSE}
 options(stringsAsFactors = FALSE)
+library(sf)
 library(tidyverse)
 library(stringr)
 library(knitr)
@@ -42,6 +43,8 @@ library(git2rdata)
 library(INLA)
 library(inlatools)
 library(inlabru)
+library(BelgiumMaps.StatBel)
+library(gstat)
 uitvoer <- knitr::opts_knit$get("rmarkdown.pandoc.to")
 opts_chunk$set(
   echo = TRUE,
