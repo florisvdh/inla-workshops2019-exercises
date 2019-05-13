@@ -29,6 +29,8 @@ lg3data_I1 <-
 lg3data_I1 %>% str
 ```
 
+Een stap die we hier overslaan, maar eerst genomen moet worden, is het nagaan of het model de juiste assumptie maakt ivm de distributie van deze residuals!
+Zeer waarschijnlijk is het gaussiaanse model hier niet geschikt.
 
 Berekenen van het variogram:
 
